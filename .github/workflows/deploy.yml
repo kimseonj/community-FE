@@ -1,25 +1,33 @@
-name: Deploy
+name: Deploy Frontend
 
 on:
   push:
     branches:
-      - main
+      - develop
+  pull_request:
+    branches:
+      - develop
+  workflow_dispatch:
 
 permissions:
   contents: read
-  pages: write
-  id-token: write
 
 concurrency:
-  group: github-pages
+  group: frontend-deploy
   cancel-in-progress: true
+
+env:
+  APP_DIR: ${{ vars.APP_DIR || '/opt/community/V1/docker/app' }}
+  FRONTEND_DIST_DIR: ${{ vars.FRONTEND_DIST_DIR || '/opt/community/V1/docker/app/frontend/dist' }}
+  VITE_API_BASE_URL: ${{ vars.VITE_API_BASE_URL || '/api' }}
+  VITE_BASE_PATH: ${{ vars.VITE_BASE_PATH || '/' }}
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    env:
-      VITE_API_BASE_URL: ${{ secrets.VITE_API_BASE_URL }}
-      VITE_BASE_PATH: /community-FE/
+    outputs:
+      artifact-name: frontend-dist
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -39,21 +47,74 @@ jobs:
       - name: Build
         run: npm run build
 
-      - name: Configure Pages
-        uses: actions/configure-pages@v5
-
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
+      - name: Upload dist artifact
+        uses: actions/upload-artifact@v4
         with:
+          name: frontend-dist
           path: dist
+          if-no-files-found: error
 
   deploy:
-    runs-on: ubuntu-latest
     needs: build
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    environment: production
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+    env:
+      DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+      DEPLOY_PORT: ${{ secrets.DEPLOY_PORT || '22' }}
+      DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+      DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+
     steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+      - name: Download dist artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: frontend-dist
+          path: dist
+
+      - name: Configure SSH
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          : "${DEPLOY_HOST:?DEPLOY_HOST secret is required}"
+          : "${DEPLOY_USER:?DEPLOY_USER secret is required}"
+          : "${DEPLOY_SSH_KEY:?DEPLOY_SSH_KEY secret is required}"
+
+          mkdir -p ~/.ssh
+          printf '%s\n' "$DEPLOY_SSH_KEY" | tr -d '\r' > ~/.ssh/community_frontend_deploy_key
+          chmod 600 ~/.ssh/community_frontend_deploy_key
+          ssh-keyscan -p "$DEPLOY_PORT" -H "$DEPLOY_HOST" >> ~/.ssh/known_hosts
+
+      - name: Upload static files
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          SSH_TARGET="${DEPLOY_USER}@${DEPLOY_HOST}"
+          REMOTE_DIST_DIR="$(printf '%q' "$FRONTEND_DIST_DIR")"
+
+          ssh -i ~/.ssh/community_frontend_deploy_key -p "$DEPLOY_PORT" "$SSH_TARGET" \
+            "mkdir -p ${REMOTE_DIST_DIR} && find ${REMOTE_DIST_DIR} -mindepth 1 -maxdepth 1 -exec rm -rf -- {} +"
+
+          tar -C dist -czf - . | ssh -i ~/.ssh/community_frontend_deploy_key -p "$DEPLOY_PORT" "$SSH_TARGET" \
+            "tar -xzf - -C ${REMOTE_DIST_DIR}"
+
+      - name: Reload Caddy
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          SSH_TARGET="${DEPLOY_USER}@${DEPLOY_HOST}"
+          REMOTE_APP_DIR="$(printf '%q' "$APP_DIR")"
+
+          ssh -i ~/.ssh/community_frontend_deploy_key -p "$DEPLOY_PORT" "$SSH_TARGET" \
+            "cd ${REMOTE_APP_DIR} && test -x ./deploy.sh && ./deploy.sh frontend"
+
+      - name: Deployment summary
+        run: |
+          {
+            echo "### Frontend deployment"
+            echo "- Target: \`${DEPLOY_USER}@${DEPLOY_HOST}:${FRONTEND_DIST_DIR}\`"
+            echo "- Runtime: \`Caddy static files\`"
+          } >> "$GITHUB_STEP_SUMMARY"
