@@ -34,7 +34,7 @@ export function LoginPage() {
   return (
     <section className="page narrow-page">
       <div className="page-title">
-        <h1>로그인</h1>
+        <h1>종주메이트 로그인</h1>
         <p>기록 작성, 좋아요, 코스 알림받기는 로그인이 필요합니다.</p>
       </div>
 

@@ -1,4 +1,4 @@
-# Community FE
+# 종주메이트 FE
 
 바닐라 JS 프론트를 React + Vite 기반으로 다시 구성한 모바일 우선 프론트엔드입니다.
 

@@ -11,8 +11,7 @@ import { navigate } from '../hooks/useHashRoute';
 import { useAuth } from '../context/AuthContext';
 
 const navItems = [
-  { path: '/feed', label: '피드', icon: Home },
-  { path: '/write', label: '작성', icon: PenLine },
+  { path: '/feed', label: '홈', icon: Home },
   { path: '/courses', label: '코스', icon: Route },
   { path: '/notifications', label: '알림', icon: Bell },
   { path: '/profile', label: '내 정보', icon: CircleUserRound },
@@ -26,12 +25,19 @@ export function AppShell({ route, unreadCount, children }) {
     navigate('/login');
   };
 
+  const showComposeButton = user && route.path !== '/write' && !route.path.startsWith('/edit');
+
   return (
     <div className="app-shell">
       <header className="app-header">
         <button className="brand-button" type="button" onClick={() => navigate('/feed')}>
-          <Bike size={22} aria-hidden="true" />
-          <span>Community</span>
+          <span className="brand-mark">
+            <Bike size={20} aria-hidden="true" />
+          </span>
+          <span className="brand-copy">
+            <strong>종주메이트</strong>
+            <small>국토종주 커뮤니티</small>
+          </span>
         </button>
 
         <div className="header-actions">
@@ -60,6 +66,12 @@ export function AppShell({ route, unreadCount, children }) {
 
       <main className="app-main">{children}</main>
 
+      {showComposeButton && (
+        <button className="floating-compose" type="button" aria-label="종주 기록 작성" onClick={() => navigate('/write')}>
+          <PenLine size={24} aria-hidden="true" />
+        </button>
+      )}
+
       <nav className="bottom-nav" aria-label="주요 메뉴">
         {navItems.map((item) => {
           const Icon = item.icon;
@@ -70,13 +82,16 @@ export function AppShell({ route, unreadCount, children }) {
               className={`bottom-nav-item ${active ? 'active' : ''}`}
               type="button"
               key={item.path}
+              aria-label={item.label}
+              aria-current={active ? 'page' : undefined}
               onClick={() => navigate(item.path)}
             >
+              {active && <span className="bottom-nav-active-indicator" aria-hidden="true" />}
               <span className="bottom-nav-icon">
-                <Icon size={20} aria-hidden="true" />
+                <Icon size={22} aria-hidden="true" />
                 {item.path === '/notifications' && unreadCount > 0 && <span className="nav-dot" />}
               </span>
-              <span>{item.label}</span>
+              <span className="bottom-nav-label">{item.label}</span>
             </button>
           );
         })}

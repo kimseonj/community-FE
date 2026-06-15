@@ -98,7 +98,7 @@ export function RegisterPage() {
   return (
     <section className="page narrow-page">
       <div className="page-title">
-        <h1>회원가입</h1>
+        <h1>종주메이트 시작하기</h1>
         <p>닉네임은 10자 이하, 비밀번호는 대소문자/숫자/특수문자를 포함해야 합니다.</p>
       </div>
 

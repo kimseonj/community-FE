@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Bell, BellOff, SendHorizontal } from 'lucide-react';
+import { Bell, BellOff, MapPinned, SendHorizontal, ShieldCheck, TriangleAlert } from 'lucide-react';
 import { api } from '../api/client';
 import { endpoints } from '../api/endpoints';
 import { useAuth } from '../context/AuthContext';
@@ -28,6 +28,16 @@ export function CoursePage() {
 
   const subscribedIds = useMemo(() => new Set(subscriptions.map((course) => course.id)), [subscriptions]);
   const selectedCourse = courses.find((course) => course.id === selectedCourseId) || courses[0];
+  const courseSummary = useMemo(() => {
+    const cautionCount = courses.filter((course) => course.currentStatus && course.currentStatus !== 'NORMAL').length;
+
+    return [
+      { label: '전체 코스', value: courses.length, icon: MapPinned },
+      { label: '정상 주행', value: courses.length - cautionCount, icon: ShieldCheck },
+      { label: '주의 필요', value: cautionCount, icon: TriangleAlert },
+      { label: '내 알림', value: subscriptions.length, icon: Bell },
+    ];
+  }, [courses, subscriptions.length]);
 
   const loadCourses = async () => {
     setLoading(true);
@@ -119,6 +129,20 @@ export function CoursePage() {
         <EmptyState title="등록된 코스가 없습니다" />
       ) : (
         <>
+          <div className="course-dashboard" aria-label="코스 상태 요약">
+            {courseSummary.map((item) => {
+              const Icon = item.icon;
+
+              return (
+                <div className="course-dashboard-item" key={item.label}>
+                  <Icon size={18} aria-hidden="true" />
+                  <strong>{item.value}</strong>
+                  <span>{item.label}</span>
+                </div>
+              );
+            })}
+          </div>
+
           <div className="course-list">
             {courses.map((course) => {
               const subscribed = subscribedIds.has(course.id);
