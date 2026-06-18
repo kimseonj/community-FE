@@ -413,8 +413,8 @@ img {
   left: 50%;
   z-index: 20;
   display: grid;
-  width: min(420px, calc(100% - 28px));
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  width: min(360px, calc(100% - 32px));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 6px;
   padding: 8px;
   border: 1px solid rgba(6, 95, 70, 0.14);
@@ -1075,13 +1075,13 @@ textarea {
   }
 
   .bottom-nav {
-    width: 420px;
+    width: 360px;
   }
 }
 
 @media (max-width: 390px) {
   .bottom-nav {
-    width: min(100% - 20px, 420px);
+    width: min(100% - 24px, 360px);
   }
 
   .bottom-nav-item {

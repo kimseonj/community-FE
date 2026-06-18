@@ -5,15 +5,13 @@ import {
   Home,
   LogOut,
   PenLine,
-  Route,
 } from 'lucide-react';
 import { navigate } from '../hooks/useHashRoute';
 import { useAuth } from '../context/AuthContext';
 
 const navItems = [
   { path: '/feed', label: '홈', icon: Home },
-  { path: '/courses', label: '코스', icon: Route },
-  { path: '/notifications', label: '알림', icon: Bell },
+  { path: '/courses', label: '코스 상태', icon: Bike },
   { path: '/profile', label: '내 정보', icon: CircleUserRound },
 ];
 
@@ -89,7 +87,6 @@ export function AppShell({ route, unreadCount, children }) {
               {active && <span className="bottom-nav-active-indicator" aria-hidden="true" />}
               <span className="bottom-nav-icon">
                 <Icon size={22} aria-hidden="true" />
-                {item.path === '/notifications' && unreadCount > 0 && <span className="nav-dot" />}
               </span>
               <span className="bottom-nav-label">{item.label}</span>
             </button>
