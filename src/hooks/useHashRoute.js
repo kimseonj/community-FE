@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 
 function normalizeHash() {
   const raw = window.location.hash.replace(/^#/, '');
-  return raw || '/feed';
+  return raw || '/home';
 }
 
 export function navigate(path) {

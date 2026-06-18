@@ -5,13 +5,15 @@ import {
   Home,
   LogOut,
   PenLine,
+  Trophy,
 } from 'lucide-react';
 import { navigate } from '../hooks/useHashRoute';
 import { useAuth } from '../context/AuthContext';
 
 const navItems = [
-  { path: '/feed', label: '홈', icon: Home },
-  { path: '/courses', label: '코스 상태', icon: Bike },
+  { path: '/home', label: '홈', icon: Home },
+  { path: '/records', label: '기록', icon: Trophy },
+  { path: '/courses', label: '코스', icon: Bike },
   { path: '/profile', label: '내 정보', icon: CircleUserRound },
 ];
 
@@ -28,7 +30,7 @@ export function AppShell({ route, unreadCount, children }) {
   return (
     <div className="app-shell">
       <header className="app-header">
-        <button className="brand-button" type="button" onClick={() => navigate('/feed')}>
+        <button className="brand-button" type="button" onClick={() => navigate('/home')}>
           <span className="brand-mark">
             <Bike size={20} aria-hidden="true" />
           </span>
@@ -73,7 +75,9 @@ export function AppShell({ route, unreadCount, children }) {
       <nav className="bottom-nav" aria-label="주요 메뉴">
         {navItems.map((item) => {
           const Icon = item.icon;
-          const active = route.path === item.path || (item.path === '/feed' && route.path.startsWith('/posts/'));
+          const active =
+            route.path === item.path ||
+            (item.path === '/records' && (route.path === '/feed' || route.path.startsWith('/posts/')));
 
           return (
             <button
@@ -86,9 +90,9 @@ export function AppShell({ route, unreadCount, children }) {
             >
               {active && <span className="bottom-nav-active-indicator" aria-hidden="true" />}
               <span className="bottom-nav-icon">
-                <Icon size={22} aria-hidden="true" />
+                <Icon size={26} aria-hidden="true" />
               </span>
-              <span className="bottom-nav-label">{item.label}</span>
+              <span className="sr-only">{item.label}</span>
             </button>
           );
         })}

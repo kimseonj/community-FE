@@ -6,6 +6,7 @@ import { useAuth } from './context/AuthContext';
 import { navigate, useHashRoute } from './hooks/useHashRoute';
 import { CoursePage } from './pages/CoursePage';
 import { FeedPage } from './pages/FeedPage';
+import { HomePage } from './pages/HomePage';
 import { LoginPage } from './pages/LoginPage';
 import { NotificationsPage } from './pages/NotificationsPage';
 import { PostDetailPage } from './pages/PostDetailPage';
@@ -17,12 +18,13 @@ function resolvePage(route) {
   const [section, id] = route.segments;
 
   if (route.path === '/' || route.path === '') {
-    return <Redirect to="/feed" />;
+    return <Redirect to="/home" />;
   }
 
   if (route.path === '/login') return <LoginPage />;
   if (route.path === '/register') return <RegisterPage />;
-  if (route.path === '/feed') return <FeedPage />;
+  if (route.path === '/home') return <HomePage />;
+  if (route.path === '/records' || route.path === '/feed') return <FeedPage />;
   if (route.path === '/write') return <PostFormPage />;
   if (section === 'posts' && id) return <PostDetailPage postId={id} />;
   if (section === 'edit' && id) return <PostFormPage postId={id} />;
@@ -30,7 +32,7 @@ function resolvePage(route) {
   if (route.path === '/notifications') return <NotificationsPage />;
   if (route.path === '/profile') return <ProfilePage />;
 
-  return <Redirect to="/feed" />;
+  return <Redirect to="/home" />;
 }
 
 function Redirect({ to }) {

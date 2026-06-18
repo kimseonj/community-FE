@@ -121,7 +121,7 @@ export function PostDetailPage({ postId }) {
 
     try {
       await api.patch(endpoints.posts.deactivate(postId));
-      navigate('/feed');
+      navigate('/records');
     } catch (error) {
       setStatus(getErrorMessage(error, '게시글 삭제에 실패했습니다.'));
     }
@@ -145,7 +145,7 @@ export function PostDetailPage({ postId }) {
         <EmptyState
           title="게시글을 찾을 수 없습니다"
           action={
-            <button className="secondary-button" type="button" onClick={() => navigate('/feed')}>
+            <button className="secondary-button" type="button" onClick={() => navigate('/records')}>
               목록으로
             </button>
           }
@@ -156,7 +156,7 @@ export function PostDetailPage({ postId }) {
 
   return (
     <section className="page detail-page">
-      <button className="back-button" type="button" onClick={() => navigate('/feed')}>
+      <button className="back-button" type="button" onClick={() => navigate('/records')}>
         <ArrowLeft size={18} aria-hidden="true" />
         목록
       </button>

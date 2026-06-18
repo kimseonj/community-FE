@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Award, Camera, Eye, MapPinned, MessageCircle, PenLine, Route, ThumbsUp, Trophy } from 'lucide-react';
+import { Eye, MessageCircle, ThumbsUp, Trophy } from 'lucide-react';
 import { api, resolveAssetUrl } from '../api/client';
 import { endpoints } from '../api/endpoints';
 import { navigate } from '../hooks/useHashRoute';
@@ -14,15 +14,9 @@ const filters = [
   { id: 'weekly', label: '주간' },
 ];
 
-function readPostTypeCount(data) {
-  if (typeof data === 'number') return data;
-  return Number(data?.postTypeCount ?? data?.count ?? data?.totalCount ?? 0);
-}
-
 export function FeedPage() {
   const [activeFilter, setActiveFilter] = useState('latest');
   const [posts, setPosts] = useState([]);
-  const [homeStats, setHomeStats] = useState({ completed: null, inProgress: null });
   const [nextCursor, setNextCursor] = useState(null);
   const [hasNext, setHasNext] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -63,94 +57,11 @@ export function FeedPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeFilter]);
 
-  useEffect(() => {
-    let ignore = false;
-
-    const loadHomeStats = async () => {
-      const [completedResult, inProgressResult] = await Promise.allSettled([
-        api.get(endpoints.posts.typeCount('completed')),
-        api.get(endpoints.posts.typeCount('in_progress')),
-      ]);
-
-      if (ignore) return;
-
-      setHomeStats({
-        completed: completedResult.status === 'fulfilled' ? readPostTypeCount(completedResult.value) : null,
-        inProgress: inProgressResult.status === 'fulfilled' ? readPostTypeCount(inProgressResult.value) : null,
-      });
-    };
-
-    loadHomeStats();
-
-    return () => {
-      ignore = true;
-    };
-  }, []);
-
-  const storyStats = useMemo(() => {
-    const imageCount = posts.filter((post) => post.postImageUrl).length;
-
-    return [
-      {
-        label: '완료 기록',
-        value: homeStats.completed == null ? '-' : formatCount(homeStats.completed),
-        icon: Award,
-      },
-      {
-        label: '진행 중',
-        value: homeStats.inProgress == null ? '-' : formatCount(homeStats.inProgress),
-        icon: Route,
-      },
-      {
-        label: '최근 사진',
-        value: imageCount > 0 ? formatCount(imageCount) : '-',
-        icon: Camera,
-      },
-      {
-        label: '인증센터',
-        value: '86',
-        icon: MapPinned,
-      },
-    ];
-  }, [homeStats.completed, homeStats.inProgress, posts]);
-
   return (
-    <section className="page feed-page">
-      <section className="home-brief" aria-labelledby="home-title">
-        <div className="home-brief-copy">
-          <span className="eyebrow">Jongju Mate</span>
-          <h1 id="home-title">함께 달리는 국토종주 기록</h1>
-          <p>완주 인증, 준비 여정, 코스 제보를 한곳에서 확인하세요.</p>
-          <div className="home-actions">
-            <button className="primary-button compact" type="button" onClick={() => navigate('/write')}>
-              <PenLine size={17} aria-hidden="true" />
-              기록하기
-            </button>
-            <button className="secondary-button compact" type="button" onClick={() => navigate('/courses')}>
-              <Route size={17} aria-hidden="true" />
-              코스 보기
-            </button>
-          </div>
-        </div>
-      </section>
-
-      <div className="home-metrics" aria-label="종주 현황">
-        {storyStats.map((item) => {
-          const Icon = item.icon;
-
-          return (
-            <div className="home-metric" key={item.label}>
-              <Icon size={18} aria-hidden="true" />
-              <strong>{item.value}</strong>
-              <span>{item.label}</span>
-            </div>
-          );
-        })}
-      </div>
-
+    <section className="page records-page">
       <div className="page-title with-action feed-section-title">
         <div>
-          <h2>최근 종주 이야기</h2>
+          <h1>기록</h1>
           <p>준비 중인 기록과 완료한 기록을 함께 봅니다.</p>
         </div>
       </div>

@@ -128,7 +128,7 @@ export function PostFormPage({ postId }) {
 
   return (
     <section className="page narrow-page">
-      <button className="back-button" type="button" onClick={() => (editing ? navigate(`/posts/${postId}`) : navigate('/feed'))}>
+      <button className="back-button" type="button" onClick={() => (editing ? navigate(`/posts/${postId}`) : navigate('/records'))}>
         <ArrowLeft size={18} aria-hidden="true" />
         돌아가기
       </button>
