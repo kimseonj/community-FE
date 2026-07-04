@@ -37,11 +37,13 @@ export function AuthProvider({ children }) {
   const login = useCallback(
     async ({ email, password }) => {
       const data = await api.post(endpoints.auth.login, { email, password });
+      const detail = await api.get(endpoints.users.detail(data.userId)).catch(() => null);
       const nextUser = {
         id: data.userId,
         email: data.userEmail || email,
         nickname: data.nickname,
         imageUrl: data.imageUrl,
+        role: detail?.role,
       };
       applyUser(nextUser);
       return nextUser;
@@ -73,11 +75,12 @@ export function AuthProvider({ children }) {
         email: data.email,
         nickname: data.nickname,
         imageUrl: data.imageUrl,
+        role: data.role || user.role,
       };
       applyUser(nextUser);
       return nextUser;
     },
-    [applyUser, user?.id],
+    [applyUser, user?.id, user?.role],
   );
 
   const refreshSession = useCallback(async () => {
@@ -88,6 +91,20 @@ export function AuthProvider({ children }) {
 
     try {
       await api.get(endpoints.auth.refresh);
+      if (!user.role) {
+        const detail = await api.get(endpoints.users.detail(user.id)).catch(() => null);
+        if (!detail) {
+          setAuthChecked(true);
+          return true;
+        }
+        applyUser({
+          id: detail.id,
+          email: detail.email,
+          nickname: detail.nickname,
+          imageUrl: detail.imageUrl,
+          role: detail.role,
+        });
+      }
       setAuthChecked(true);
       return true;
     } catch {

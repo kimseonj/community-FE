@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
 import {
-  Bike,
   ChevronRight,
   MapPinned,
   PenLine,
@@ -9,7 +8,7 @@ import {
   Trophy,
   UserRound,
 } from 'lucide-react';
-import { api } from '../api/client';
+import { api, resolveAssetUrl } from '../api/client';
 import { endpoints } from '../api/endpoints';
 import { navigate } from '../hooks/useHashRoute';
 import { EmptyState } from '../components/EmptyState';
@@ -36,7 +35,7 @@ export function HomePage() {
       setStatus('');
 
       const [postResult, completedResult, inProgressResult, courseResult] = await Promise.allSettled([
-        api.get(endpoints.posts.list({ size: 2 })),
+        api.get(endpoints.posts.index),
         api.get(endpoints.posts.typeCount('completed')),
         api.get(endpoints.posts.typeCount('in_progress')),
         api.get(endpoints.courses.list),
@@ -45,8 +44,7 @@ export function HomePage() {
       if (ignore) return;
 
       if (postResult.status === 'fulfilled') {
-        const nextPosts = postResult.value?.posts || postResult.value || [];
-        setPosts(nextPosts.slice(0, 2));
+        setPosts((postResult.value || []).slice(0, 3));
       }
 
       if (courseResult.status === 'fulfilled') {
@@ -82,11 +80,11 @@ export function HomePage() {
       completed,
       inProgress,
       progress,
-      title: inProgress > 0 ? '진행 중인 종주가 있어요' : '다음 종주를 준비해볼까요?',
+      title: total > 0 ? `${formatCount(total)}개의 종주 기록이 공유됐어요` : '첫 종주 이야기를 기다리고 있어요',
       description:
         total > 0
-          ? `완료 ${formatCount(completed)}개, 진행 중 ${formatCount(inProgress)}개 기록이 쌓였어요.`
-          : '첫 기록을 남기면 진행 현황이 이곳에 표시됩니다.',
+          ? `완주 ${formatCount(completed)}개 · 진행 중 ${formatCount(inProgress)}개`
+          : '완주했거나 달리고 있는 여정을 공유해보세요.',
     };
   }, [stats.completed, stats.inProgress]);
 
@@ -102,20 +100,20 @@ export function HomePage() {
   const quickActions = [
     { label: '기록하기', description: '오늘의 여정', icon: PenLine, path: '/write' },
     { label: '코스보기', description: '상태 확인', icon: MapPinned, path: '/courses' },
-    { label: '내 기록', description: '전체 피드', icon: Trophy, path: '/records' },
+    { label: '전체 기록', description: '여정 둘러보기', icon: Trophy, path: '/records' },
   ];
 
   return (
     <section className="page home-page">
       <section className="home-dashboard-card" aria-labelledby="home-dashboard-title">
         <div className="home-dashboard-copy">
-          <span className="eyebrow">Jongju Mate</span>
+          <span className="eyebrow">종주메이트 기록 현황</span>
           <h1 id="home-dashboard-title">{dashboard.title}</h1>
           <p>{dashboard.description}</p>
         </div>
-        <div className="home-progress" aria-label={`완료 기록 비율 ${dashboard.progress}%`}>
+        <div className="home-progress" aria-label={`공유된 기록 중 완주 비중 ${dashboard.progress}%`}>
           <div className="home-progress-top">
-            <span>완료 기록 비율</span>
+            <span>공유된 기록 중 완주 비중</span>
             <strong>{dashboard.progress}%</strong>
           </div>
           <div className="home-progress-track">
@@ -124,7 +122,7 @@ export function HomePage() {
           <div className="home-progress-stats">
             <span>
               <ShieldCheck size={15} aria-hidden="true" />
-              완료 {formatCount(dashboard.completed)}
+              완주 {formatCount(dashboard.completed)}
             </span>
             <span>
               <Route size={15} aria-hidden="true" />
@@ -223,10 +221,13 @@ export function HomePage() {
                   <strong>{post.title}</strong>
                   <small>{formatDate(post.createdAt)}</small>
                 </div>
-                <span className="home-record-author">
-                  <UserRound size={15} aria-hidden="true" />
-                  {post.nickname || '익명'}
-                </span>
+                <div className="home-record-side">
+                  {post.postImageUrl && <img src={resolveAssetUrl(post.postImageUrl)} alt="" loading="lazy" />}
+                  <span className="home-record-author">
+                    <UserRound size={15} aria-hidden="true" />
+                    {post.nickname || '익명'}
+                  </span>
+                </div>
               </button>
             ))}
           </div>

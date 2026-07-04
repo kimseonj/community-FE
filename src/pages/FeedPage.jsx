@@ -62,7 +62,7 @@ export function FeedPage() {
       <div className="page-title with-action feed-section-title">
         <div>
           <h1>기록</h1>
-          <p>준비 중인 기록과 완료한 기록을 함께 봅니다.</p>
+          <p>진행 중인 여정과 최종 완주 기록을 함께 봅니다.</p>
         </div>
       </div>
 
@@ -111,7 +111,13 @@ export function FeedPage() {
                 </div>
                 <h2>{post.title}</h2>
                 <p className="post-card-author">
-                  <span className="mini-avatar">{post.nickname?.slice(0, 1) || '?'}</span>
+                  <span className="mini-avatar">
+                    {post.imageUrl ? (
+                      <img src={resolveAssetUrl(post.imageUrl)} alt="" loading="lazy" />
+                    ) : (
+                      post.nickname?.slice(0, 1) || '?'
+                    )}
+                  </span>
                   <span>{post.nickname || '익명'}</span>
                 </p>
                 <div className="metric-row">
@@ -129,9 +135,6 @@ export function FeedPage() {
                   </span>
                 </div>
               </div>
-              {post.postImageUrl && (
-                <img className="post-card-image" src={resolveAssetUrl(post.postImageUrl)} alt="" loading="lazy" />
-              )}
             </button>
           ))}
         </div>

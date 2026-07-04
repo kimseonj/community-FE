@@ -5,6 +5,7 @@ import { endpoints } from './api/endpoints';
 import { useAuth } from './context/AuthContext';
 import { navigate, useHashRoute } from './hooks/useHashRoute';
 import { CoursePage } from './pages/CoursePage';
+import { AdminReportsPage } from './pages/AdminReportsPage';
 import { FeedPage } from './pages/FeedPage';
 import { HomePage } from './pages/HomePage';
 import { LoginPage } from './pages/LoginPage';
@@ -31,6 +32,7 @@ function resolvePage(route) {
   if (route.path === '/courses') return <CoursePage />;
   if (route.path === '/notifications') return <NotificationsPage />;
   if (route.path === '/profile') return <ProfilePage />;
+  if (route.path === '/admin/reports') return <AdminReportsPage />;
 
   return <Redirect to="/home" />;
 }

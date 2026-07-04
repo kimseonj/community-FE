@@ -135,7 +135,7 @@ export function PostFormPage({ postId }) {
 
       <div className="page-title">
         <h1>{editing ? '기록 수정' : '기록 작성'}</h1>
-        <p>종주 상태와 사진을 함께 남겨 여정을 또렷하게 기록합니다.</p>
+        <p>진행 중인 상황이나 최종 완주 기록을 사진과 함께 공유합니다.</p>
       </div>
 
       <form className="form-panel" onSubmit={handleSubmit}>
