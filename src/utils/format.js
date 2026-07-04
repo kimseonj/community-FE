@@ -1,6 +1,6 @@
 export const postTypeLabels = {
-  IN_PROGRESS: '준비/진행',
-  COMPLETED: '완료',
+  IN_PROGRESS: '진행 중',
+  COMPLETED: '완주',
 };
 
 export const courseStatusLabels = {

@@ -54,4 +54,15 @@ export const endpoints = {
     },
     markRead: (notificationId) => `/me/notifications/${notificationId}/read`,
   },
+  admin: {
+    reports: {
+      list: ({ cursor, size = 20 } = {}) => {
+        const params = new URLSearchParams({ size: String(size) });
+        if (cursor) params.set('cursor', String(cursor));
+        return `/admin/course-reports?${params.toString()}`;
+      },
+      update: (reportId) => `/admin/course-reports/${reportId}`,
+      delete: (reportId) => `/admin/course-reports/${reportId}`,
+    },
+  },
 };

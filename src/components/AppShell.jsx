@@ -5,6 +5,7 @@ import {
   Home,
   LogOut,
   PenLine,
+  ShieldCheck,
   Trophy,
 } from 'lucide-react';
 import { navigate } from '../hooks/useHashRoute';
@@ -43,6 +44,16 @@ export function AppShell({ route, unreadCount, children }) {
         <div className="header-actions">
           {user ? (
             <>
+              {user.role === 'ADMIN' && (
+                <button
+                  className="icon-button"
+                  type="button"
+                  aria-label="관리자 제보 관리"
+                  onClick={() => navigate('/admin/reports')}
+                >
+                  <ShieldCheck size={20} aria-hidden="true" />
+                </button>
+              )}
               <button
                 className="icon-button notification-button"
                 type="button"
