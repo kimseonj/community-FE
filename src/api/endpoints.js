@@ -56,9 +56,8 @@ export const endpoints = {
   },
   admin: {
     reports: {
-      list: ({ status, cursor, size = 20 } = {}) => {
+      list: ({ cursor, size = 20 } = {}) => {
         const params = new URLSearchParams({ size: String(size) });
-        if (status) params.set('status', status);
         if (cursor) params.set('cursor', String(cursor));
         return `/admin/course-reports?${params.toString()}`;
       },

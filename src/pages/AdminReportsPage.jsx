@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Check, Pencil, Trash2, X } from 'lucide-react';
+import { Pencil, Trash2 } from 'lucide-react';
 import { api } from '../api/client';
 import { endpoints } from '../api/endpoints';
 import { EmptyState } from '../components/EmptyState';
@@ -8,12 +8,6 @@ import { StatusMessage } from '../components/StatusMessage';
 import { useAuth } from '../context/AuthContext';
 import { navigate } from '../hooks/useHashRoute';
 import { courseStatusLabels, formatDate, getErrorMessage } from '../utils/format';
-
-const filters = [
-  { value: 'PENDING', label: '승인 대기' },
-  { value: 'APPROVED', label: '승인' },
-  { value: 'REJECTED', label: '반려' },
-];
 
 function normalizeReports(data) {
   if (Array.isArray(data)) return { reports: data, nextCursor: null, hasNext: false };
@@ -26,7 +20,6 @@ function normalizeReports(data) {
 
 export function AdminReportsPage() {
   const { user, isLoggedIn, authChecked } = useAuth();
-  const [filter, setFilter] = useState('PENDING');
   const [reports, setReports] = useState([]);
   const [nextCursor, setNextCursor] = useState(null);
   const [hasNext, setHasNext] = useState(false);
@@ -41,7 +34,7 @@ export function AdminReportsPage() {
     setMessage({ type: 'error', text: '' });
 
     try {
-      const data = normalizeReports(await api.get(endpoints.admin.reports.list({ status: filter, cursor })));
+      const data = normalizeReports(await api.get(endpoints.admin.reports.list({ cursor })));
       setReports((prev) => (append ? [...prev, ...data.reports] : data.reports));
       setNextCursor(data.nextCursor);
       setHasNext(data.hasNext);
@@ -51,7 +44,7 @@ export function AdminReportsPage() {
       setLoading(false);
       setLoadingMore(false);
     }
-  }, [filter]);
+  }, []);
 
   useEffect(() => {
     if (!authChecked) return;
@@ -92,21 +85,7 @@ export function AdminReportsPage() {
     <section className="page admin-reports-page">
       <div className="page-title">
         <h1>제보 관리</h1>
-        <p>코스 상태 제보를 검토하고 승인, 수정, 반려 또는 삭제합니다.</p>
-      </div>
-
-      <div className="segmented-control" aria-label="제보 상태 필터">
-        {filters.map((item) => (
-          <button
-            type="button"
-            key={item.value}
-            className={filter === item.value ? 'active' : ''}
-            aria-pressed={filter === item.value}
-            onClick={() => setFilter(item.value)}
-          >
-            {item.label}
-          </button>
-        ))}
+        <p>잘못된 코스 상태 제보를 수정하거나 삭제합니다.</p>
       </div>
 
       <StatusMessage type={message.type}>{message.text}</StatusMessage>
@@ -118,7 +97,7 @@ export function AdminReportsPage() {
         </div>
       ) : reports.length === 0 ? (
         <EmptyState
-          title={message.text ? '제보를 표시할 수 없습니다' : '해당 상태의 제보가 없습니다'}
+          title={message.text ? '제보를 표시할 수 없습니다' : '등록된 제보가 없습니다'}
           description={message.text ? '관리자 제보 API가 연결되어 있는지 확인해주세요.' : undefined}
         />
       ) : (
@@ -171,24 +150,6 @@ export function AdminReportsPage() {
                   <p>{report.content}</p>
                   <span className="admin-report-author">제보자 {report.reporterNickname || '알 수 없음'}</span>
                   <div className="admin-report-actions">
-                    {report.status === 'PENDING' && (
-                      <>
-                        <button
-                          className="primary-button compact"
-                          type="button"
-                          onClick={() => updateReport(report.id, { status: 'APPROVED' }, '제보를 승인했습니다.')}
-                        >
-                          <Check size={16} aria-hidden="true" /> 승인
-                        </button>
-                        <button
-                          className="secondary-button compact"
-                          type="button"
-                          onClick={() => updateReport(report.id, { status: 'REJECTED' }, '제보를 반려했습니다.')}
-                        >
-                          <X size={16} aria-hidden="true" /> 반려
-                        </button>
-                      </>
-                    )}
                     <button
                       className="secondary-button compact"
                       type="button"

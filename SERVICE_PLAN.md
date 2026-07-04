@@ -30,7 +30,7 @@
 | 코스 구독·해제 | 연결됨 | `/courses/subscriptions`, `/courses/{id}/subscription` |
 | 코스 상태 제보 | 연결됨 | `/courses/{id}/reports` |
 | 알림 목록·읽음 처리 | 연결됨 | `/me/notifications` |
-| 관리자 제보 관리 화면 | 프론트 구현, 백엔드 API 없음 | `/admin/course-reports` 필요 |
+| 관리자 제보 사후 관리 화면 | 프론트 구현, 백엔드 API 없음 | `/admin/course-reports` 필요 |
 | 코스별 제보 상세·이력 | 백엔드 API 없음 | 추가 필요 |
 | 거리·구간·진행률이 포함된 종주 기록 | 백엔드 데이터 모델 없음 | 추가 필요 |
 
@@ -64,16 +64,16 @@
 
 현재는 앱을 열었을 때 확인하는 인앱 알림이다. 앱을 닫은 상태에서도 알림이 필요해질 때 웹 푸시 구독 정보와 발송 처리를 추가한다.
 
-### 6. 관리자 제보 승인 API
+### 6. 관리자 제보 관리 API
 
-프론트는 관리자 계정의 `role`을 확인해 `/admin/reports` 화면을 노출한다. 실제 관리를 위해 다음 API와 응답 필드가 필요하다.
+제보는 등록 즉시 코스 상태에 반영하고, 관리자는 잘못된 제보만 사후에 수정·삭제한다. 프론트는 관리자 계정의 `role`을 확인해 `/admin/reports` 화면을 노출한다. 실제 관리를 위해 다음 API와 응답 필드가 필요하다.
 
-- `GET /admin/course-reports?status=PENDING&cursor={id}&size=20`: 제보 목록과 `nextCursor`, `hasNext` 반환
-- `PATCH /admin/course-reports/{id}`: 타입·내용 수정 또는 `APPROVED`·`REJECTED` 상태 변경
+- `GET /admin/course-reports?cursor={id}&size=20`: 제보 목록과 `nextCursor`, `hasNext` 반환
+- `PATCH /admin/course-reports/{id}`: 타입·내용 수정
 - `DELETE /admin/course-reports/{id}`: 제보 소프트 삭제
-- 목록 항목: `id`, `courseId`, `courseName`, `reporterNickname`, `type`, `content`, `status`, `createdAt`
+- 목록 항목: `id`, `courseId`, `courseName`, `reporterNickname`, `type`, `content`, `createdAt`
 
-현재 백엔드는 제보 등록 즉시 코스 상태를 변경하고 구독자 알림을 발송한다. 승인제를 적용하려면 최초 상태를 `PENDING`으로 저장하고, 관리자가 `APPROVED`로 바꿀 때만 코스 상태 변경과 알림 발송을 실행해야 한다. 모든 `/admin/**` API는 프론트의 역할 표시와 별개로 서버에서 `ADMIN` 권한을 검증해야 한다. 공개 회원가입 요청의 `role`도 서버가 항상 `USER`로 강제해야 관리자 계정 생성 취약점을 막을 수 있다.
+수정·삭제한 제보가 해당 코스의 최신 제보라면 백엔드는 코스의 현재 상태를 다시 계산해야 한다. 이미 발송된 알림은 회수하지 않는다. 모든 `/admin/**` API는 프론트의 역할 표시와 별개로 서버에서 `ADMIN` 권한을 검증해야 한다. 공개 회원가입 요청의 `role`도 서버가 항상 `USER`로 강제해야 관리자 계정 생성 취약점을 막을 수 있다.
 
 ## 이번 범위에서 제외
 
